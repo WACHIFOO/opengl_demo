@@ -80,6 +80,10 @@ int main(void)
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
+		// Si pulsas escape ce cierra la venana
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+			glfwSetWindowShouldClose(window, true);
+		}
 
 		buffers();
 
@@ -95,4 +99,6 @@ int main(void)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 { 
 	std::cout << "El tamaño de la pantalla es: " << width << "x" << height << std::endl;
+	// Actualizamos el viewport. Es decir le decimos a opengl cual es su area de render
+	glViewport(0, 0, width, height);
 }
