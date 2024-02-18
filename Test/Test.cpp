@@ -60,7 +60,10 @@ Es como si te enseño un dibujo y por detras voy pintando el siguiente.
 */
 void buffers()
 {
-	/* Render here */
+	// Le decimos que para limpiar la pantalla ponga este color:
+	glClearColor(0.3f, 0.1f, 0.6f, 1.0f);
+
+	/* Limpiamos la pantalla */
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	/* Swap front and back buffers */
