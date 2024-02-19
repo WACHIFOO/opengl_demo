@@ -80,6 +80,56 @@ int main(void)
 	std::cout << "#### INICIO PROGRAMA ####" << std::endl;
 	inicializar();
 
+	/*Shaders, El chico dice que esto se suele meter em un archivo aparte*/
+	// Esto es opengl script o algo asi
+	const char* vertexShaderSrc = 
+		"#version 400 core\n"
+		"layout (location = 0) in vec3 aPos;\n"
+		"void main() {\n"
+		"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+		"}\0";
+
+	// Ni zorra, el color del triangulo se define aqui
+	const char* fragmentShaderSrc = 
+		"#version 400 core\n"
+		"out vec4 fragColor;\n"
+		"void main() {\n"
+		"    fragColor = vec4(0.0f, 1.0, 1.0f, 1.0f);\n"
+		"}\0";
+
+
+	/*
+	El fragment es toda la informacion necesaria para que OpenGl renderice cada pixel
+	*/
+
+	// Le pasamos cositas al opengl
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSrc, 0);
+
+	// Ahora compilamos el vertex shader
+	glCompileShader(vertexShader);
+	int success;
+	char infoLog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	
+	if (!success) {
+		glGetShaderInfoLog(vertexShader, 512, 0, infoLog);
+		std::cout << "> Error al compilar el vertex shader!\n\tERR " << infoLog << std::endl;
+	}
+
+	// Ahora compilamos el fragmentShader
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSrc, 0);
+	glCompileShader(fragmentShader);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glGetShaderInfoLog(fragmentShader, 512, 0, infoLog);
+		std::cout << "> Error al compilar el fragment shader!\n\tERR " << infoLog << std::endl;
+	}
+
+
+
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -105,3 +155,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// Actualizamos el viewport. Es decir le decimos a opengl cual es su area de render
 	glViewport(0, 0, width, height);
 }
+
+/*
+https://www.youtube.com/watch?v=e1i_a68CgYE
+*/
