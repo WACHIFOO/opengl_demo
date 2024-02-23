@@ -66,6 +66,8 @@ void buffers()
 	/* Limpiamos la pantalla */
 	glClear(GL_COLOR_BUFFER_BIT);
 
+
+
 	/* Swap front and back buffers */
 	glfwSwapBuffers(window);
 
@@ -149,6 +151,69 @@ int main(void)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+
+	/*********************************/
+	/*********** TRIANGULO ***********/
+	/*********************************/
+	// OpenGL trabaja siemore en 3d asi que tiene X, Y, Z.
+	// Las coordenadas son floats que van del -1 al 1 (Da igual el tamaño de la pantalla, estan normalizadas)
+	// Entonces:
+	// Centro: 0, 0
+	// abajo izquierda: X:-1 Y:-1
+	// arriba derecha: X:1, Y:1 
+	float vertices[] = {
+		-0.5f, -0.5f, 0.0f,
+		0.0f, 0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+	};
+	// Ahora enviamos estas coordenadas como inpiut al primer proceso de la pipeline
+	// Que es el vertexShader
+	// Esto se hace creando (reservando?) memoria a la gpu.
+	// Almacenamos el vertexData diciendo a opengl como interpretarla y enviarla a la GPU
+	unsigned int VertexBufferObject;
+	
+	// Toda la info que viene? Pues la guardamos aqui
+	unsigned int VertexArrayObject;
+
+	glGenBuffers(1, &VertexBufferObject);
+	glGenVertexArrays(1, &VertexArrayObject);
+
+	// Esto lo hacemos antes por que esto guarda lo que oasa en el VertexBufferObject
+	glBindVertexArray(VertexArrayObject);
+	// Combinamos lo que hay con glArrayBuffer
+	glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObject);
+
+
+	// Paasamos datos a la grafica
+	// El tercer parametro: GL_STEAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW 
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// GL_STEAM_DRAW: La info se ¿setea? solo una vez y la gpu la usa como mucho pocas veces
+	// GL_STATIC_DRAW: La info se seta solo una vez y la gpu la usa muchas veces.
+	// GL_DYNAMIC_DRAW: Significa que los datos cambian mucho y se usa mucho
+	// Quiero entender que como yo voy a mostrar todo el rato por pantalla un triangulo
+	// Y el triangulo es estatico, se la envio una vez pero le digo que no deje de mostrarlo
+	// De otro modo quiza muestra 1 frame el triangulo y ya.
+	// Y con dinamico puedo hacer que rote? o algo asi supongo
+
+	// Definimos como interpretar los datos enviados a la grafica
+	// El primer 0 es especificar aPos del vertexShaderSrc
+	// Como es un array de 3
+	// y floats
+	// No normalizamos
+	// Stride es el espacio entre cada vertice, como cada vertice (Posicion del array) empieza donde acaba el anterior pasamos 0 para que lo determine opengl, pero tambien podemos pasarle el sizeof(float)*3 para decirle que son floats y van 3 por cada posicion (WTF esto). El dice ok, 4bytes por cada nodo
+	// El ultimo parametro es StartAfterVertex DIOS NO LO ENTIENDO, pero hay que castearlo por que no puede ser 0
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FASTEST, sizeof(float) * 3, (void*)0);
+	// Por defecto esto esta disabled, pues lo enableamos jaja
+	glEnableVertexAttribArray(0);
+
+
+	// Ahora lo unbindeamos, no se por que. Quiza para liberar memoria
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -157,10 +222,32 @@ int main(void)
 			glfwSetWindowShouldClose(window, true);
 		}
 
-		buffers();
+		//buffers();
+		// Le decimos que para limpiar la pantalla ponga este color:
+		glClearColor(0.3f, 0.1f, 0.6f, 1.0f);
 
+		/* Limpiamos la pantalla */
+		glClear(GL_COLOR_BUFFER_BIT);
 
+		// Decimos que usar y como leer los datos
+		glUseProgram(shaderProgram);
+		// Usamos el VertexArrayObject a la hora de dibujar el triangulo y asi no especificamos todo el rato lo de arriba
+		glBindVertexArray(VertexArrayObject);
+
+		// Ahora dibujamos, Como tenemos 3 puntos solo marcamos 3
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+
+		/* Poll for and process events */
+		glfwPollEvents();
 	}
+
+	// Liberamos datos de memoria antes de eliminar el programa
+	glDeleteProgram(shaderProgram);
+	glDeleteBuffers(1, &VertexBufferObject);
+	glDeleteVertexArrays(1, &VertexArrayObject);
 
 	glfwTerminate();
 	return 0;
