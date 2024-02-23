@@ -100,6 +100,9 @@ int main(void)
 
 	/*
 	El fragment es toda la informacion necesaria para que OpenGl renderice cada pixel
+	
+	Esto contiene cosas del rollo luces, sombras, el color de la luz.
+	Con esta info sabe como pintar el pixel
 	*/
 
 	// Le pasamos cositas al opengl
@@ -127,8 +130,24 @@ int main(void)
 		std::cout << "> Error al compilar el fragment shader!\n\tERR " << infoLog << std::endl;
 	}
 
+	// No entiendo muy bien pero como que le decimos al programa que usar?
+	// Rollo arriba lo creamos y compilamos y ahora lo linkamos con el programa principal? No veo cambios visuales jaja
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	// Y ahora lo linkamos que es como decir que lo compile
+	// Intenta compilarlo
+	glLinkProgram(shaderProgram);
+	// Mira si hay algo mal
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, 0, infoLog);
+		std::cout << "> Error al linkar el shaderProgram!\n\tERR " << infoLog << std::endl;
+	}
 
-
+	// Como ya estan compilados y linkados no los necesitamos mas. Los eliminamos para liberar recursos
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
